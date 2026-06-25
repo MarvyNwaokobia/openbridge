@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "types": ["node"]
+  },
+  "include": ["src/**/*.ts"],
+  "references": [
+    { "path": "../corridor-core" },
+    { "path": "../corridor-nigeria" },
+    { "path": "../corridor-uk" },
+    { "path": "../corridor-us" }
+  ]
+}

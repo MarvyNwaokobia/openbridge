@@ -1,0 +1,177 @@
+# =============================================================================
+# OpenBridge — local development stack
+# Adapted from Rafiki's official local development docker-compose.
+# Built for the Interledger Open Payments Accelerator 2026.
+#
+# Brings up the ASE core (Rafiki backend + auth), the datastores they depend on,
+# and a placeholder for the OpenBridge gateway API.
+#
+#   docker compose up -d postgres redis rafiki-backend rafiki-auth
+#
+# Note: Rafiki's backend and auth servers use separate logical databases on the
+# same Postgres instance (see ./infra/postgres/init.sql which creates them).
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL — shared instance hosting three databases:
+  #   - openbridge      (OpenBridge application data)
+  #   - rafiki_backend  (Rafiki backend)
+  #   - rafiki_auth     (Rafiki auth server)
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: openbridge-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: openbridge
+      POSTGRES_PASSWORD: openbridge
+      POSTGRES_DB: openbridge
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U openbridge"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ---------------------------------------------------------------------------
+  # Redis — GNAP grant caching, interaction sessions, rate limiting,
+  # and Rafiki's own caching/locking.
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: openbridge-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ---------------------------------------------------------------------------
+  # Rafiki backend — wallet address server + Open Payments resource server
+  # (incoming-payments, outgoing-payments, quotes) + Backend Admin API.
+  #
+  #   :3000  Open Payments resource server
+  #   :3001  Backend Admin GraphQL API
+  #   :3002  ILP connector
+  # ---------------------------------------------------------------------------
+  rafiki-backend:
+    image: ghcr.io/interledger/rafiki-backend:latest
+    container_name: openbridge-rafiki-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+    environment:
+      NODE_ENV: development
+      LOG_LEVEL: info
+      INSTANCE_NAME: openbridge
+      # Public Open Payments URL — wallet addresses live under this host.
+      OPEN_PAYMENTS_URL: ${OPENBRIDGE_PUBLIC_URL:-http://localhost:3000}
+      # Datastores
+      DATABASE_URL: postgres://openbridge:openbridge@postgres:5432/rafiki_backend
+      REDIS_URL: redis://redis:6379/1
+      # ILP addressing
+      ILP_ADDRESS: test.openbridge
+      CONNECTOR_URL: http://rafiki-backend:3002
+      # Wire the auth server (GNAP grant + token introspection)
+      AUTH_SERVER_GRANT_URL: http://rafiki-auth:3006
+      AUTH_SERVER_INTROSPECTION_URL: http://rafiki-auth:3007
+      # Webhook target — OpenBridge gateway receives payment lifecycle events
+      # here and triggers corridor settlement (Paystack / Stripe).
+      WEBHOOK_URL: http://gateway-api:4000/webhooks/rafiki
+      EXCHANGE_RATES_URL: http://gateway-api:4000/rates
+      # Ports
+      ADMIN_PORT: 3001
+      OPEN_PAYMENTS_PORT: 3000
+      CONNECTOR_PORT: 3002
+
+  # ---------------------------------------------------------------------------
+  # Rafiki auth server — GNAP authorization server (grant issuance,
+  # interaction, token introspection).
+  #
+  #   :3006  GNAP auth / grant endpoint
+  #   :3007  token introspection
+  #   :3009  interaction endpoint
+  # ---------------------------------------------------------------------------
+  rafiki-auth:
+    image: ghcr.io/interledger/rafiki-auth:latest
+    container_name: openbridge-rafiki-auth
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "3006:3006"
+      - "3007:3007"
+      - "3009:3009"
+    environment:
+      NODE_ENV: development
+      LOG_LEVEL: info
+      AUTH_DATABASE_URL: postgres://openbridge:openbridge@postgres:5432/rafiki_auth
+      REDIS_URL: redis://redis:6379/2
+      AUTH_SERVER_URL: ${RAFIKI_AUTH_URL:-http://localhost:3006}
+      # The OpenBridge onboarding UI renders the GNAP consent screens that the
+      # auth server redirects the user to.
+      IDENTITY_SERVER_URL: http://localhost:5173/consent
+      IDENTITY_SERVER_SECRET: changeme-identity-secret
+      COOKIE_KEY: changeme-cookie-key-32-bytes-min!!
+      INTROSPECTION_PORT: 3007
+      AUTH_PORT: 3006
+      INTERACTION_PORT: 3009
+
+  # ---------------------------------------------------------------------------
+  # OpenBridge gateway API — PLACEHOLDER
+  # Orchestrates Rafiki events, routes to corridor connectors (Paystack/Stripe),
+  # owns the user + corridor-mapping store, and verifies ZK linkage proofs.
+  # Uncomment once packages/gateway-api ships a Dockerfile.
+  # ---------------------------------------------------------------------------
+  # gateway-api:
+  #   build:
+  #     context: .
+  #     dockerfile: packages/gateway-api/Dockerfile
+  #   container_name: openbridge-gateway
+  #   restart: unless-stopped
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #     rafiki-backend:
+  #       condition: service_started
+  #   ports:
+  #     - "4000:4000"
+  #   environment:
+  #     NODE_ENV: development
+  #     GATEWAY_PORT: 4000
+  #     DATABASE_URL: postgres://openbridge:openbridge@postgres:5432/openbridge
+  #     REDIS_URL: redis://redis:6379/0
+  #     RAFIKI_BACKEND_URL: http://rafiki-backend:3001/graphql
+  #     RAFIKI_RESOURCE_URL: http://rafiki-backend:3000
+  #     RAFIKI_AUTH_URL: http://rafiki-auth:3006
+  #     PAYSTACK_SECRET_KEY: ${PAYSTACK_SECRET_KEY}
+  #     STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+  #     STRIPE_CONNECT_CLIENT_ID: ${STRIPE_CONNECT_CLIENT_ID}
+  #     ZK_VERIFIER_KEY_PATH: /app/packages/zk-linkage/target/vk
+  #   env_file:
+  #     - .env
+
+volumes:
+  postgres-data:
+  redis-data:

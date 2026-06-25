@@ -1,0 +1,12 @@
+{
+  "name": "@openbridge/rafiki-config",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Rafiki deployment configuration, asset/peering setup, and seed data for OpenBridge. Built for the Interledger Open Payments Accelerator 2026.",
+  "license": "MIT",
+  "author": "Marvy Nwaokobia <marvynwaokobia@gmail.com>",
+  "type": "module",
+  "scripts": {
+    "seed": "echo 'rafiki-config: seed assets (NGN, GBP, USD) + peering — TODO'"
+  }
+}

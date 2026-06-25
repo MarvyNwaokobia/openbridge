@@ -1,0 +1,22 @@
+{
+  "name": "@openbridge/corridor-uk",
+  "version": "0.1.0",
+  "private": true,
+  "description": "UK corridor (Stripe Connect / Faster Payments) for OpenBridge. Built for the Interledger Open Payments Accelerator 2026.",
+  "license": "MIT",
+  "author": "Marvy Nwaokobia <marvynwaokobia@gmail.com>",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@openbridge/corridor-core": "0.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}

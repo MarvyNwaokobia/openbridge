@@ -1,0 +1,43 @@
+# OpenBridge — Built for the Interledger Open Payments Accelerator 2026
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Secrets / environment
+.env
+.env.*
+!.env.example
+secrets/
+*.key
+*.pem
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Noir / Nargo artifacts
+target/
+*.gz
+*.json.witness
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Datastore volumes (local)
+postgres-data/
+redis-data/
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Coverage / test
+coverage/
+.nyc_output/

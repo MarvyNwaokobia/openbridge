@@ -1,0 +1,9 @@
+# OpenBridge — zk-linkage account_linkage circuit
+# Built for the Interledger Open Payments Accelerator 2026.
+[package]
+name = "account_linkage"
+type = "bin"
+authors = ["Marvy Nwaokobia <marvynwaokobia@gmail.com>"]
+compiler_version = ">=0.30.0"
+
+[dependencies]

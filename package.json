@@ -1,0 +1,41 @@
+{
+  "name": "openbridge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Rafiki-based Open Payments account provider issuing real wallet addresses to Nigerian, UK, and US accounts. Built for the Interledger Open Payments Accelerator 2026.",
+  "license": "MIT",
+  "author": "Marvy Nwaokobia <marvynwaokobia@gmail.com>",
+  "homepage": "https://github.com/MarvyNwaokobia/openbridge",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MarvyNwaokobia/openbridge.git"
+  },
+  "engines": {
+    "node": ">=20",
+    "npm": ">=10"
+  },
+  "workspaces": [
+    "packages/corridor-core",
+    "packages/corridor-nigeria",
+    "packages/corridor-uk",
+    "packages/corridor-us",
+    "packages/zk-linkage",
+    "packages/gateway-api",
+    "packages/rafiki-config",
+    "apps/onboarding-ui"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=packages/gateway-api",
+    "dev:ui": "npm run dev --workspace=apps/onboarding-ui",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "tsc --build --verbose",
+    "zk:build": "npm run build --workspace=packages/zk-linkage",
+    "rafiki:up": "docker compose up -d postgres redis rafiki-backend rafiki-auth",
+    "rafiki:down": "docker compose down",
+    "rafiki:migrate": "docker compose exec rafiki-backend npm run knex -- migrate:latest",
+    "rafiki:seed": "docker compose exec rafiki-backend npm run knex -- seed:run",
+    "rafiki:logs": "docker compose logs -f rafiki-backend rafiki-auth"
+  }
+}

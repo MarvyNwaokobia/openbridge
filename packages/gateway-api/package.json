@@ -1,0 +1,27 @@
+{
+  "name": "@openbridge/gateway-api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "OpenBridge gateway API: orchestrates Rafiki + corridor connectors. Built for the Interledger Open Payments Accelerator 2026.",
+  "license": "MIT",
+  "author": "Marvy Nwaokobia <marvynwaokobia@gmail.com>",
+  "type": "module",
+  "main": "./dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsc --build",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@openbridge/corridor-core": "0.1.0",
+    "@openbridge/corridor-nigeria": "0.1.0",
+    "@openbridge/corridor-uk": "0.1.0",
+    "@openbridge/corridor-us": "0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "tsx": "^4.16.0",
+    "typescript": "^5.5.0"
+  }
+}

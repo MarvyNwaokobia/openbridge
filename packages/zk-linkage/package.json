@@ -1,0 +1,13 @@
+{
+  "name": "@openbridge/zk-linkage",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ZK account-linkage circuit (Noir/UltraHonk) and proof verification for OpenBridge. Built for the Interledger Open Payments Accelerator 2026.",
+  "license": "MIT",
+  "author": "Marvy Nwaokobia <marvynwaokobia@gmail.com>",
+  "type": "module",
+  "scripts": {
+    "build": "cd circuits/account_linkage && nargo compile",
+    "test": "cd circuits/account_linkage && nargo test"
+  }
+}

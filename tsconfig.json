@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "files": [],
+  "references": [
+    { "path": "packages/corridor-core" },
+    { "path": "packages/corridor-nigeria" },
+    { "path": "packages/corridor-uk" },
+    { "path": "packages/corridor-us" },
+    { "path": "packages/gateway-api" }
+  ]
+}
