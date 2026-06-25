@@ -266,29 +266,7 @@ pnpm install
 cp .env.example .env
 ```
 
-Fill in `.env`:
-
-```bash
-# Rafiki / ASE
-OPENBRIDGE_DOMAIN=openbridge.org          # wallet-address host (use a tunnel locally)
-RAFIKI_AUTH_URL=http://localhost:3006
-RAFIKI_RESOURCE_URL=http://localhost:3000
-RAFIKI_ADMIN_URL=http://localhost:3001
-
-# Datastores
-DATABASE_URL=postgres://openbridge:openbridge@localhost:5432/openbridge
-REDIS_URL=redis://localhost:6379
-
-# Nigeria corridor (Paystack)
-PAYSTACK_SECRET_KEY=sk_test_xxx
-
-# UK / US corridors (Stripe Connect)
-STRIPE_SECRET_KEY=sk_test_xxx
-STRIPE_CONNECT_CLIENT_ID=ca_xxx
-
-# ZK linkage
-ZK_VERIFIER_KEY_PATH=./packages/zk-linkage/target/vk
-```
+Then fill in `.env` — Rafiki/datastore URLs, your Paystack and Stripe sandbox keys, and the ZK verifier path. Every variable is documented inline in [`.env.example`](./.env.example).
 
 ### Run Rafiki and the datastores locally
 
@@ -372,19 +350,6 @@ If you're building in **Kenya (M-Pesa)**, **Ghana (MTN MoMo)**, India (UPI), the
 5. (Optional) Adapt `zk-linkage` if your market supports a verifiable account/identity attestation.
 
 See [`docs/corridor-spec.md`](./docs/corridor-spec.md) and [`docs/open-source-guide.md`](./docs/open-source-guide.md). Issues and PRs that add corridors, harden existing ones, or extend the ZK layer are all welcome — open an issue describing your market and rail before you start so we can help you scope it.
-
-## About the builder
-
-**Marvy Nwaokobia** — full-stack blockchain developer and technical content creator, based in Lagos, Nigeria. Builds across payments, zero-knowledge, and cross-chain infrastructure; Web3Bridge graduate (Lagos cohort).
-
-Selected prior work, with an emphasis on the payments-and-ZK lineage this project builds on:
-
-- **RoamPay** — AI-agent smart wallet on Celo mainnet with a ZK passport proof via Self Protocol; live deployment.
-- **Shielded Token** — Noir/UltraHonk private ERC-20 using a note-based UTXO model and Poseidon2 hashing. *(Direct ancestor of OpenBridge's ZK account-linkage layer.)*
-- **ShadowBridge** — CCTP + Zama FHEVM cross-chain settlement across 3 chains; 27/27 tests passing.
-- **LastKey** — on-chain inheritance protocol built with Foundry; 94/94 tests passing.
-
-**Contact:** [marvynwaokobia@gmail.com](mailto:marvynwaokobia@gmail.com) · **GitHub:** [@MarvyNwaokobia](https://github.com/MarvyNwaokobia)
 
 ## License
 
