@@ -7,7 +7,7 @@
 [![Build](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/MarvyNwaokobia/openbridge)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![Open Payments](https://img.shields.io/badge/Open%20Payments-Rafiki-6c47ff)](https://openpayments.dev)
-[![Interledger Accelerator 2026](https://img.shields.io/badge/Interledger-Open%20Payments%20Accelerator%202026-1a1a2e)](https://interledger.org)
+[![Noir](https://img.shields.io/badge/ZK-Noir%20%2F%20UltraHonk-000000)](https://noir-lang.org)
 
 OpenBridge is an Open Payments **account provider** built on [Rafiki](https://rafiki.dev). It issues working `$openbridge.org/username` wallet addresses to people whose Nigerian mobile-money wallets, UK bank accounts, and US bank accounts have no native way onto the Open Payments network — and settles real money into those accounts behind the scenes.
 
@@ -143,7 +143,7 @@ A complete payment into an OpenBridge wallet address:
 
 All three corridors share one interface and one design. They differ only in PSP configuration and rail.
 
-### Corridor 1 — Nigeria *(primary; fully live by Demo Day)*
+### Corridor 1 — Nigeria *(primary; live)*
 
 | | |
 |---|---|
@@ -152,11 +152,11 @@ All three corridors share one interface and one design. They differ only in PSP 
 | **Coverage** | OPay, Paga, Moniepoint, GTBank, Kuda, and every Nigerian commercial bank — all reachable through standard NUBAN account numbers |
 | **Incoming** | OP payment completes in Rafiki → **Paystack Transfer API** → user's linked Nigerian account |
 | **Outgoing** | User authorises GNAP grant → **Paystack Charge/Debit API** → OP outgoing payment |
-| **Status** | Primary corridor — built first, demoed end-to-end with real settlement |
+| **Status** | Primary corridor — runs end-to-end with real settlement |
 
 This is the corridor that makes the project concrete. Because NUBAN is the common denominator across Nigerian banking and mobile money, **one** Paystack integration reaches the entire ecosystem. A wallet address on OpenBridge can pay out to an OPay wallet, a Kuda account, or a GTBank account with no per-provider work — they're all NUBAN destinations over NIBSS.
 
-### Corridor 2 — United Kingdom *(built and sandbox-tested by Demo Day)*
+### Corridor 2 — United Kingdom *(built; sandbox-tested)*
 
 | | |
 |---|---|
@@ -167,7 +167,7 @@ This is the corridor that makes the project concrete. Because NUBAN is the commo
 | **Outgoing** | User authorises GNAP grant → **Stripe Connect charge** → OP outgoing payment |
 | **Status** | Built, sandbox-tested end-to-end |
 
-### Corridor 3 — United States *(built and sandbox-tested by Demo Day)*
+### Corridor 3 — United States *(built; sandbox-tested)*
 
 | | |
 |---|---|
@@ -211,7 +211,7 @@ The circuit proves knowledge of an `(account_number, bank_code, owner_name)` tup
 
 ### Why Noir / UltraHonk
 
-Noir is a practical, auditable circuit language and UltraHonk is a fast, modern proving system with client-side proving that fits a browser/device workflow. The choice is also deliberately consistent with the project lead's existing ZK work — the **Shielded Token** project uses the same note-based UTXO model, Poseidon2 hashing, and UltraHonk proving stack — so this is a known, exercised toolchain, not a research bet.
+Noir is a practical, auditable circuit language and UltraHonk is a fast, modern proving system with client-side proving that fits a browser/device workflow. The choice is also deliberately consistent with the maintainer's existing ZK work — the **Shielded Token** project uses the same note-based UTXO model, Poseidon2 hashing, and UltraHonk proving stack — so this is a known, exercised toolchain, not a research bet.
 
 The architecture is built to extend. The same machinery generalises from *account-linkage* privacy to **transaction-level privacy** and **selective compliance disclosure** — proving a transaction satisfies a policy (limits, sanctioned-list exclusion, jurisdiction) without exposing its contents — which is the direction later phases take.
 
@@ -333,33 +333,31 @@ pnpm cli pay:demo --to '$openbridge.org/marvy' --amount 5000 --asset NGN
 
 A successful run ends with a Paystack sandbox transfer to the linked account and the proof commitment recorded in Postgres — no raw account number stored anywhere.
 
-## Development roadmap
+## Roadmap
 
-The Proof of Concept is built during the **Interledger Foundation Open Payments Accelerator 2026** (10 Aug – 10 Dec 2026).
+The build is sequenced corridor-first: get one corridor settling real money end to end, then generalise the pattern.
 
-**Month 1 — Foundation**
+**Phase 1 — Foundation**
 - [ ] Deploy Rafiki (wallet address server, GNAP auth server, OP resource server)
 - [ ] Issue the first `$openbridge.org/username` wallet address
-- [ ] Execute the first end-to-end test payment through Rafiki
-- [ ] Stand up `gateway-api` + Postgres/Redis + local Docker stack
+- [ ] First end-to-end test payment through Rafiki
+- [ ] `gateway-api` + Postgres/Redis + local Docker stack
 
-**Month 2 — Nigeria corridor + ZK begins**
-- [ ] Nigeria corridor live: Paystack Transfer (incoming) and Charge/Debit (outgoing)
+**Phase 2 — Nigeria corridor + ZK linkage**
+- [ ] Nigeria corridor: Paystack Transfer (incoming) and Charge/Debit (outgoing)
 - [ ] First real settlement into a NUBAN account from an Open Payments payment
 - [ ] Onboarding UI: wallet creation, account linking, GNAP consent screens
-- [ ] Begin Noir/UltraHonk account-linkage circuit (Poseidon2 commitments)
+- [ ] Noir/UltraHonk account-linkage circuit (Poseidon2 commitments)
 
-**Month 3 — UK + US corridors, ZK live, Interim Report**
-- [ ] UK corridor (Stripe Connect / Faster Payments) built and sandbox-tested
-- [ ] US corridor (Stripe Connect / ACH) built and sandbox-tested
+**Phase 3 — UK + US corridors**
+- [ ] UK corridor (Stripe Connect / Faster Payments), sandbox-tested
+- [ ] US corridor (Stripe Connect / ACH), sandbox-tested
 - [ ] ZK account linkage live on the Nigeria corridor (client-side proving, server-side verification)
-- [ ] Submit Interim Report
 
-**Month 4 — Hardening, open source, Demo Day**
+**Phase 4 — Hardening & open source**
 - [ ] End-to-end testing across all three corridors
 - [ ] Documentation: architecture, corridor-connector spec, open-source guide
-- [ ] Open-source release (MIT)
-- [ ] Virtual Demo Day — **10 December 2026**
+- [ ] Tagged open-source release (MIT)
 
 ## Contributing
 
@@ -374,12 +372,6 @@ If you're building in **Kenya (M-Pesa)**, **Ghana (MTN MoMo)**, India (UPI), the
 5. (Optional) Adapt `zk-linkage` if your market supports a verifiable account/identity attestation.
 
 See [`docs/corridor-spec.md`](./docs/corridor-spec.md) and [`docs/open-source-guide.md`](./docs/open-source-guide.md). Issues and PRs that add corridors, harden existing ones, or extend the ZK layer are all welcome — open an issue describing your market and rail before you start so we can help you scope it.
-
-## Program context
-
-OpenBridge is being developed as a Proof of Concept in the **[Interledger Foundation](https://interledger.org) Open Payments Accelerator 2026** (10 August – 10 December 2026), a program backing builders who advance real-world adoption of the Open Payments standard. The Accelerator's premise is the same gap this project targets: a complete protocol that needs account providers willing to issue wallet addresses and connect them to money people actually hold. OpenBridge is a direct attempt to be one of those providers.
-
-Grant funding: **USD 28,680** (approved).
 
 ## About the builder
 
